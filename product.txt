@@ -1,0 +1,62 @@
+import java.util.*;
+
+class ProductCipher {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        // Input for encryption
+        System.out.println("Enter the input to be encrypted:");
+        String plaintext = scanner.nextLine();
+
+        // Substitution Cipher: Shift each character by 5
+        StringBuilder substitutedText = new StringBuilder();
+        for (int i = 0; i < plaintext.length(); i++) {
+            char c = plaintext.charAt(i);
+            substitutedText.append((char) (c + 5)); // Simple shift
+        }
+        System.out.println("Substituted text:");
+        System.out.println(substitutedText);
+
+        // Transposition Key
+        String key = "3142"; // Example key indicating column order
+        int n = key.length(); // Number of columns from the key
+
+        String transpositionInput = substitutedText.toString();
+        // Pad with '/' if necessary
+        int modulus;
+        if ((modulus = transpositionInput.length() % n) != 0) {
+            modulus = n - modulus; // Calculate how many characters to add
+            for (; modulus != 0; modulus--) {
+                transpositionInput += "/"; // Padding character
+            }
+        }
+
+        // Create a 2D array for the transposition matrix
+        char[][] matrix = new char[transpositionInput.length() / n][n];
+        int index = 0;
+        
+        // Fill the matrix row-wise
+        for (int i = 0; i < matrix.length; i++) {
+            for (int j = 0; j < n; j++) {
+                matrix[i][j] = transpositionInput.charAt(index++);
+            }
+        }
+
+        // Generate the transposed text using the key
+        StringBuilder transposedText = new StringBuilder();
+        System.out.println("Transposition Matrix:");
+        for (char c : key.toCharArray()) {
+            int col = Character.getNumericValue(c) - 1; // Convert char to int (1-based to 0-based)
+            for (int row = 0; row < matrix.length; row++) {
+                transposedText.append(matrix[row][col]); // Append characters in the order defined by the key
+                System.out.print(matrix[row][col]); // Print the character
+            }
+            System.out.println();
+        }
+
+        System.out.println("Final encrypted text:");
+        System.out.println(transposedText);
+       
+        scanner.close();
+    }
+}
