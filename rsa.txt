@@ -1,0 +1,113 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class RSASignature {
+    // Euclid's Algorithm for GCD
+    public static int euclid(int m, int n) {
+        if (n == 0) {
+            return m;
+        } else {
+            return euclid(n, m % n);
+        }
+    }
+
+    // Extended Euclid's Algorithm
+    public static int[] exteuclid(int a, int b) {
+        int r1 = a, r2 = b;
+        int s1 = 1, s2 = 0;
+        int t1 = 0, t2 = 1;
+
+        while (r2 > 0) {
+            int q = r1 / r2;
+            int r = r1 - q * r2;
+            r1 = r2;
+            r2 = r;
+
+            int s = s1 - q * s2;
+            s1 = s2;
+            s2 = s;
+
+            int t = t1 - q * t2;
+            t1 = t2;
+            t2 = t;
+
+            if (t1 < 0) {
+                t1 += a;
+            }
+        }
+        return new int[]{r1, t1};
+    }
+
+    public static void rsaSignature() {
+        Scanner scanner = new Scanner(System.in);
+
+        // Taking input for prime numbers and public exponent
+        System.out.print("Enter the first prime number (p): ");
+        int p = scanner.nextInt();
+        System.out.print("Enter the second prime number (q): ");
+        int q = scanner.nextInt();
+        System.out.print("Enter the public exponent (e): ");
+        int e = scanner.nextInt();
+
+        int n = p * q;
+        int phiN = (p - 1) * (q - 1);
+
+        // Generating keys that are co-prime with phiN
+        List<Integer> keys = new ArrayList<>();
+        for (int i = 2; i < phiN; i++) {
+            if (euclid(phiN, i) == 1) {
+                keys.add(i);
+            }
+        }
+
+        if (!keys.contains(e)) {
+            System.out.println("Key " + e + " is not valid. Choose a different encryption key.");
+            scanner.close();
+            return;
+        }
+
+        int[] result = exteuclid(phiN, e);
+        int r = result[0];
+        int d = result[1];
+
+        if (r == 1) {
+            System.out.println("Decryption key is: " + d);
+        } else {
+            System.out.println("Multiplicative inverse for the given encryption key does not exist.");
+            scanner.close();
+            return;
+        }
+
+        // Taking input for the message
+        System.out.print("Enter the message (M) to be signed: ");
+        int M = scanner.nextInt();
+        int S = modPow(M, d, n); // Signature
+        int M1 = modPow(S, e, n); // Verified message
+
+        if (M == M1) {
+            System.out.println("As M = M1, message sent by Aaryan.");
+        } else {
+            System.out.println("As M not equal to M1, do not accept the message sent by Aaryan.");
+        }
+
+        scanner.close();
+    }
+
+    // Function to compute (base^exp) % mod
+    public static int modPow(int base, int exp, int mod) {
+        int result = 1;
+        while (exp > 0) {
+            if ((exp & 1) == 1) {
+                result = (result * base) % mod;
+            }
+            base = (base * base) % mod;
+            exp >>= 1;
+        }
+        return result;
+    }
+
+    public static void main(String[] args) {
+        rsaSignature();
+    }
+}
