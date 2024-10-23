@@ -1,0 +1,96 @@
+import java.util.*;
+
+public class PlayfairCipher {
+
+    // Size of the matrix
+    static final int SIZE = 5;
+
+    // Function to generate the 5x5 key square
+    static char[][] generateKeyTable(String key) {
+        char[][] keyTable = new char[SIZE][SIZE];
+        boolean[] used = new boolean[26]; // To track used letters
+        int index = 0;
+
+        // Add unique letters from the key
+        for (char ch : key.toLowerCase().toCharArray()) {
+            if (ch == 'j') ch = 'i'; // Treat 'j' as 'i'
+            if (!used[ch - 'a']) {
+                used[ch - 'a'] = true;
+                keyTable[index / SIZE][index % SIZE] = ch;
+                index++;
+            }
+        }
+
+        // Add remaining letters of the alphabet
+        for (char ch = 'a'; ch <= 'z'; ch++) {
+            if (ch == 'j') continue; // Skip 'j'
+            if (!used[ch - 'a']) {
+                keyTable[index / SIZE][index % SIZE] = ch;
+                index++;
+            }
+        }
+
+        return keyTable;
+    }
+
+    // Function to prepare the plaintext by adding 'z' if the length is odd
+    static String preparePlainText(String text) {
+        StringBuilder prepared = new StringBuilder();
+        for (char ch : text.toLowerCase().toCharArray()) {
+            if (ch != ' ') prepared.append(ch);
+        }
+        if (prepared.length() % 2 != 0) prepared.append('z'); // Append 'z' if length is odd
+        return prepared.toString();
+    }
+
+    // Function to find the position of characters in the key square
+    static int[] findPosition(char[][] keyTable, char ch) {
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                if (keyTable[i][j] == ch) {
+                    return new int[]{i, j};
+                }
+            }
+        }
+        return null; // Should never happen if input is valid
+    }
+
+    // Function to encrypt the plaintext using Playfair Cipher
+    static String encrypt(String plaintext, char[][] keyTable) {
+        StringBuilder cipherText = new StringBuilder();
+
+        for (int i = 0; i < plaintext.length(); i += 2) {
+            char a = plaintext.charAt(i);
+            char b = (i + 1 < plaintext.length()) ? plaintext.charAt(i + 1) : 'z'; // Pair with 'z' if odd
+
+            int[] posA = findPosition(keyTable, a);
+            int[] posB = findPosition(keyTable, b);
+
+            if (posA[0] == posB[0]) { // Same row
+                cipherText.append(keyTable[posA[0]][(posA[1] + 1) % SIZE]);
+                cipherText.append(keyTable[posB[0]][(posB[1] + 1) % SIZE]);
+            } else if (posA[1] == posB[1]) { // Same column
+                cipherText.append(keyTable[(posA[0] + 1) % SIZE][posA[1]]);
+                cipherText.append(keyTable[(posB[0] + 1) % SIZE][posB[1]]);
+            } else { // Rectangle swap
+                cipherText.append(keyTable[posA[0]][posB[1]]);
+                cipherText.append(keyTable[posB[0]][posA[1]]);
+            }
+        }
+        return cipherText.toString();
+    }
+
+    // Main method
+    public static void main(String[] args) {
+        String key = "Monarchy";
+        String plaintext = "instruments";
+
+        char[][] keyTable = generateKeyTable(key);
+        String preparedText = preparePlainText(plaintext);
+        String cipherText = encrypt(preparedText, keyTable);
+
+        System.out.println("Key: " + key);
+        System.out.println("Plaintext: " + plaintext);
+        System.out.println("Ciphertext: " + cipherText);
+    }
+}
