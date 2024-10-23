@@ -1,0 +1,55 @@
+import java.util.Scanner;
+
+public class VigCipher {
+
+    public static char getU(char c) {
+        return Character.toUpperCase(c);
+    }
+
+    public static String Encrypt(String e, String key) {
+        int l = key.length();
+        StringBuilder en = new StringBuilder();
+        for (int i = 0; i < e.length(); i++) {
+            char k = getU(key.charAt(i % l));
+            char c = getU(e.charAt(i));
+            if (Character.isLetter(c)) {
+                char ec = (char) (((c - 'A' + (k - 'A')) % 26) + 'A');
+                en.append(ec);
+            } else {
+                en.append(c);
+            }
+        }
+        return en.toString();
+    }
+
+    public static String Decrypt(String e, String key) {
+        int l = key.length();
+        StringBuilder en = new StringBuilder();
+        for (int i = 0; i < e.length(); i++) {
+            char k = getU(key.charAt(i % l));
+            char c = getU(e.charAt(i));
+            if (Character.isLetter(c)) {
+                char ec = (char) (((c - 'A' - (k - 'A') + 26) % 26) + 'A');
+                en.append(ec);
+            } else {
+                en.append(c);
+            }
+        }
+        return en.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+        System.out.println("Enter the plaintext:");
+        String e = s.nextLine();
+        System.out.println("ENTER key");
+        String key = s.nextLine();
+        String result = Encrypt(e, key);
+        System.out.println("ENCRYPTED TEXT :");
+        System.out.println(result);
+        String result2 = Decrypt(result, key);
+        System.out.println("DECRYPTED TEXT : ");
+        System.out.println(result2);
+
+    }
+}
